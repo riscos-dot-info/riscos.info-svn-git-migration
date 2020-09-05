@@ -1,0 +1,6 @@
+# Pre-read options for reposurgeon go here.
+
+branchify branches/developers/joty/* trunk branches/* tags/* *
+branchify_map :branches/developers/joty/(.*)/:joty-\1:
+#branchify_map :branches/developers/joty/llvm:heads/joty-llvm:
+#@branches/developers/joty/(.*)/$@heads/joty-\2@
