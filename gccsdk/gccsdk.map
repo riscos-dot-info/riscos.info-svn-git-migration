@@ -1,16 +1,1 @@
-rosery = rosery <rosery>
-no-author = no-author <no-author>
-caliston = Theo Markettos <git@markettos.org.uk>
-alex = alex <alex>
-lee = lee <lee>
-nick = nick <nick>
-admin = admin <admin>
-cpalmer = cpalmer <cpalmer>
-jjvdgeer = jjvdgeer <jjvdgeer>
-joty = John Tytgat <john.tytgat@aaug.net>
-cgrasden = cgrasden <cgrasden>
-jmb = jmb <jmb>
-alanb = Alan Buckley <alan_baa@hotmail.com>
-peter = peter <peter>
-cpmartin = cpmartin <cpmartin>
-phlamethrower = phlamethrower <phlamethrower>
+../userid.map
