@@ -1,0 +1,3 @@
+# Pre-read options for reposurgeon go here.
+
+#branchify trunk branches/* tags/* *
