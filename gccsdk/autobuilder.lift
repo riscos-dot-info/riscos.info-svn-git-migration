@@ -1,0 +1,30 @@
+read --user-ignores --preserve -
+
+authors read <gccsdk.map
+
+lint
+
+gitify
+
+script shared.lift
+
+# Clean up
+expunge --not --notagify /^(.gitignore|autobuilder\/)/
+branch delete /developers/
+branch delete /CMungeImportBranch/
+branch delete /release_2_95/
+branch delete /release_3_3/
+branch delete /release_3_4_1/
+branch delete /release_3_4_4_v2_stable/
+branch delete /release_3_4_6/
+branch delete /release_4_1_1/
+branch delete /release_4_1_1_v1/
+branch delete /release_4_1_1_v1a/
+branch delete /release_4_1_1_v1b/
+branch delete /release_4_1_2/
+tag delete release_3_3_3_pre1
+tag delete release_3_4_4
+
+# Write out the new repository
+prefer git
+rebuild autobuilder.git

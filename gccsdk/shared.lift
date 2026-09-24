@@ -1,0 +1,162 @@
+# We require reposurgeon 4.38
+version 4.38
+
+# Create an annotation from a lightweight tag
+define mkann {
+  tag create {0} <{1}>
+  # Jump through hoops to find the parent of the tag commit
+  # and point the annotated tag at it (doing the @par inline
+  # defeats the parser -- it thinks we're redirecting the output)
+  @par(<{1}>) assign --singleton wat
+  tag move {0} <wat>
+  unassign wat
+}
+
+# Convert lightweight release tags to annotations
+define lwtoann {
+  # Move the lightweight tag away
+  branch rename refs/tags/{0} refs/tags/bogus.{0}
+  do mkann {0} bogus.{0}
+}
+
+# Same, but forcibly point tag at a given commit
+define retag {
+  branch rename refs/tags/{0} refs/tags/bogus.{0}
+  tag create {0} <bogus.{0}>
+  tag move {0} <{1}>
+  # Handle the case where the new annotation points at
+  # the same commit as the now-bogus lightweight tag.
+  # In this case (only) we must promote the lightweight
+  # tag to a full-fat branch (as we will delete all bogus
+  # tags in the clean up phase and, if we don't make the
+  # full-fat branch, the entire history, including our
+  # newly minted annotation, will be consigned to the bin).
+  <bogus.{0}> & <{1}> index >index.txt
+  shell <index.txt awk '{print $4}' | while read t; do echo "branch rename $t refs/heads/$(basename "$t" | sed -e "s/^bogus\.//")"; done >renames.script
+  script renames.script
+  shell rm -f renames.script index.txt
+}
+
+
+# Convert all the lightweight tags into annotations
+do lwtoann release_4_7_4_v6
+do lwtoann release_4_7_4_v5
+do lwtoann release_4_7_4_v4
+# 4.7.4r3 was retagged but with local changes in SVN.
+do retag release_4_7_4_v3 7133
+do lwtoann release_4_7_4_v2
+do lwtoann release_4_7_4_v1
+
+
+do lwtoann release_4_1_2_v2
+# Tag was created with no copy base, so appears as a bare branch in SVN.
+# Need to move this branch out of the way first
+branch rename refs/deleted/r5741/tags/release_4_1_2_v1 refs/deleted/r5741/tags/release_4_1_2_v1.xxx
+do retag release_4_1_2_v1 5739
+# Put the branch back
+branch rename refs/deleted/r5741/tags/release_4_1_2_v1.xxx refs/deleted/r5741/tags/release_4_1_2_v1
+
+
+# The tag in SVN removed the autobuilder sources and moved the contents
+# of the gcc4/ tree up to the repository root. By pointing back at the
+# development branch we revert those changes: meh.
+do lwtoann release_4_1_1_v2
+# Tag was created including local changes.
+do retag release_4_1_1_v1b 3703
+# Tag was created including local changes.
+do retag release_4_1_1_v1a 3677
+# The SVN tag was modified after release and the change subsequently
+# reverted and the tag repointed. Wind the tag back to the original
+# place (thus discarding the mess).
+<release_4_1_1_v1> delete
+<release_4_1_1_v1> delete
+do retag release_4_1_1_v1 3619
+# The tag in SVN removed the autobuilder sources and moved the contents
+# of the gcc4/ tree up to the repository root. By pointing back at the
+# development branch we revert those changes: meh.
+do lwtoann release_4_1_1_pre2
+# Tag was created with no copy base, so appears as a bare branch in SVN.
+# The tag in SVN also removed the autobuilder sources. By pointing back
+# at the development branch we reintroduce these: meh.
+do retag release_4_1_1_pre1 2871
+
+
+# Tag was created with no copy base, so appears as a bare branch in SVN.
+do retag release_3_4_6_v3 2721
+do lwtoann release_3_4_6_v2
+# Tag was created with no copy base, so appears as a bare branch in SVN.
+# The tag in SVN also removed the autobuilder sources. By pointing back
+# at the development branch we reintroduce these: meh.
+do retag release_3_4_6_v1 2024
+
+
+# The tags in SVN deletes the autobuilder sources. By pointing back
+# at the development branch we reintroduce these: meh.
+do lwtoann release_3_4_5_v1
+
+
+# The tags for the next two in SVN delete the autobuilder sources.
+# By pointing back at the development branch we reintroduce these: meh.
+do lwtoann release_3_4_4_v3
+do lwtoann release_3_4_4_v2
+do lwtoann release_3_4_4
+
+
+# Tag was created including a backported fix.
+do retag release_3_4_1 1076
+
+
+# Tag in SVN contains local changes. Point at commit on release branch
+# instead (tree is then identical)
+do retag release_3_3_3_pre2 970
+do lwtoann release_3_3_3_pre1
+
+
+# These came from CVS and cvs2svn made a mess of the conversion.
+# Repoint the tags at the commits corresponding to the releases.
+do retag release_2_95_4_v3 602
+# Note: this tag doesn't _quite_ match what was in SVN
+# but it appears that the tree in SVN for this tag is
+# wrong, anyway: 3 files have been deleted from the tag
+# in SVN vs what we resurrect here (math.h, the math library
+# testsuite, and save-cwd, which was never built)
+do retag release_2_95_4_v2 514
+do retag release_2_95_4_v1 335
+
+
+do lwtoann release_2_0_0
+
+
+# The tag in SVN excises all the non-UnixLib sources.
+# We reintroduce them here (as it's simpler than introducing
+# a pointless branch to contain the sources of an ancient library)
+do lwtoann unixlib_4_1
+
+
+do lwtoann CMunge-0_76
+# The tags for the next 4 in SVN elide duplicate copies of
+# the Examples (either the Unix-format names or the RISC OS ones)
+# By repointing the tags at the commits on the import branch
+# we reinstate the duplicates, but that's probably fine.
+do lwtoann CMunge-0_72
+do lwtoann CMunge-0_71
+do lwtoann CMunge-0_70
+do lwtoann CMunge-0_69
+# The rest, however, are identical
+do lwtoann CMunge-0_68
+do lwtoann CMunge-0_67
+do lwtoann CMunge-0_52
+
+
+# master->main
+branch rename refs/heads/master refs/heads/main
+
+
+# Clean up
+expunge /.cvsignore$/
+tag delete /emptycommit/
+tag delete /deleted\//
+branch delete /bogus\./
+branch delete /deleted\//
+branch delete /merge_release_2_95_to_mainline/
+branch delete refs/tags/release
