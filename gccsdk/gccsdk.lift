@@ -1,2 +1,30 @@
-# Lift commands for gccsdk-ab
+read --user-ignores --preserve -
 
+authors read <gccsdk.map
+
+lint
+
+gitify
+
+# Rename development branches back into a sane scheme
+branch rename refs/heads/developers+joty+asasm-re2c-lemon refs/heads/developers/joty/asasm-re2c-lemon
+branch rename refs/heads/developers+joty+gcc47 refs/heads/developers/joty/gcc47
+branch rename refs/heads/developers+joty+gcc48 refs/heads/developers/joty/gcc48
+branch rename refs/heads/developers+joty+llvm refs/heads/developers/joty/llvm
+# Restore useful historic branches
+branch rename refs/deleted/r4475/heads/developers+joty+binutils-gcc-separation refs/heads/developers/joty/binutils-gcc-separation
+branch rename refs/deleted/r4625/heads/developers+joty+libscl-libunixlib-merge refs/heads/developers/joty/libscl-libunixlib-merge
+branch rename refs/deleted/r5125/heads/developers+joty+gcc refs/heads/developers/joty/gcc
+branch rename refs/deleted/r5354/heads/developers+joty+asasm-twopass refs/heads/developers/joty/asasm-twopass
+
+
+script shared.lift
+
+
+# Clean up
+expunge --notagify /^autobuilder\//
+
+
+# Write out the new repository
+prefer git
+rebuild gccsdk.git
